@@ -1,13 +1,9 @@
 # Melatonin hotkeyids
 
-a list of all the hotkey ids for functions like:
-```sh
-gui.new_hotkey(string, keyID)
-```
-or
-```sh
-utility.key_state(keyID)
-```
+> a list of all the hotkey ids for functions like:
+> gui.new_hotkey(string, keyID)
+> or
+> utility.key_state(keyID)
 
 | ID | Hotkey |
 | ------ | ------ |
@@ -18,6 +14,7 @@ utility.key_state(keyID)
 | 6 | Mouse 5 |
 | 9 | Tab |
 | 13 | Enter |
+| 16 | Shift |
 | 20 | Caps Lock |
 | 32 | Space |
 | 35 | End |
@@ -75,3 +72,9 @@ utility.key_state(keyID)
 | 121 | F10 |
 | 122 | F11 |
 | 123 | F12 |
+| 160 | Shift |
+| 161 | Shift |
+| 162 | CTRL |
+| 163 | CTRL |
+| 164 | Alt |
+| 165 | Alt |
