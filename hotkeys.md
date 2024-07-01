@@ -1,5 +1,14 @@
 # Melatonin hotkeyids
 
+a list of all the hotkey ids for functions like:
+```sh
+gui.new_hotkey(string, keyID)
+```
+or
+```sh
+utility.key_state(keyID)
+```
+
 | ID | Hotkey |
 | ------ | ------ |
 | 1 | Mouse 1 |
