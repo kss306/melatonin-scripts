@@ -28,8 +28,7 @@ end
 --render the bottom gradient bar
 local function renderBar(x,y)
     local scale_x, scale_y = x-(0.771*x), y-(0.985*y)
-    local offset_left = x-(0.226*x)
-    gradient(offset_left, y*2-(0.025*(y*2)), scale_x, scale_y, 159, 152, 222, 255, 159, 152, 222, 0, false)
+    gradient(x, y*2-(0.025*(y*2)), scale_x*-1, scale_y, 159, 152, 222, 255, 159, 152, 222, 0, true)
     gradient(x, y*2-(0.025*(y*2)), scale_x, scale_y, 159, 152, 222, 0, 159, 152, 222, 255, false)
 end
 --calculate the fps with globals.realtime und globals.framecount // Nicht optimal, frames können nicht unter 64 gehen wegen tickrate
