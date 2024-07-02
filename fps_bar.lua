@@ -81,6 +81,7 @@ local function getWordWidth(word)
 end
 --paint function
 local function paint()
+    if(not entity.is_alive(engine.get_local_player())) then return end
     local x,y = getScreenXY()
     local xpadding = 0.02
     local lastWidth = 0
