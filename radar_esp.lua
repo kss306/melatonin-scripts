@@ -33,80 +33,88 @@ local bones = {
 
 local function getScreenXY()
     local width, height = cheat.get_window_size()
-    local x, y = width / 2, height / 2
-    return x,y
+    return width / 2, height / 2
 end
 
-local function renderBody(ent)
+local function getBoneScreenPositions(ent)
+    local positions = {}
+    for bone_name, bone_id in pairs(bones) do
+        positions[bone_name] = utility.world_to_screen(entity.bone_position(ent, bone_id))
+    end
+    return positions
+end
+
+local function drawLines(bone_pairs, positions)
+    local thickness = (screen_center_x * 0.2) / distance
+    for _, pair in ipairs(bone_pairs) do
+        local x1, y1 = positions[pair[1]][1], positions[pair[1]][2]
+        local x2, y2 = positions[pair[2]][1], positions[pair[2]][2]
+        render.line(x1, y1, x2, y2, 255, 255, 255, 255, thickness)
+    end
+end
+
+local function renderBody(ent, screen_center_x)
     local enemypawn = entity.get_player_pawn(ent)
     local spottedState = memory.read_byte(enemypawn + custom_offsets["m_entitySpottedState"] + custom_offsets["m_bSpotted"])
 
-    if(spottedState == 0) then return end
+    if spottedState == 0 then return end
+
     local x,y = getScreenXY()
     local local_player = engine.get_local_player()
     local localOrigin = vector(entity.get_origin(local_player))
     local enemyOrigin = vector(entity.get_origin(ent))
-
     local distance = localOrigin:dist_to(enemyOrigin)
-    local hip_upper_x,hip_upper_y = utility.world_to_screen(entity.bone_position(ent,bones["hip_upper"]))
-    local hip_lower_x,hip_lower_y = utility.world_to_screen(entity.bone_position(ent,bones["hip_lower"]))
-    local stomach_x,stomach_y = utility.world_to_screen(entity.bone_position(ent,bones["stomach"]))
-    local chest_x,chest_y = utility.world_to_screen(entity.bone_position(ent,bones["chest"]))
-    local chest_upper_x,chest_upper_y = utility.world_to_screen(entity.bone_position(ent,bones["chest_upper"]))
-    local head_x,head_y = utility.world_to_screen(entity.bone_position(ent,bones["head"]))
 
-    local shoulder_left_x,shoulder_left_y = utility.world_to_screen(entity.bone_position(ent,bones["shoulder_left"]))
-    local elbow_left_x,elbow_left_y = utility.world_to_screen(entity.bone_position(ent,bones["elbow_left"]))
-    local wrist_left_x,wrist_left_y = utility.world_to_screen(entity.bone_position(ent,bones["wrist_left"]))
-    local hand_left_x,hand_left_y = utility.world_to_screen(entity.bone_position(ent,bones["hand_left"]))
+    local positions = getBoneScreenPositions(ent)
 
-    local shoulder_right_x,shoulder_right_y = utility.world_to_screen(entity.bone_position(ent,bones["shoulder_right"]))
-    local elbow_right_x,elbow_right_y = utility.world_to_screen(entity.bone_position(ent,bones["elbow_right"]))
-    local wrist_right_x,wrist_right_y = utility.world_to_screen(entity.bone_position(ent,bones["wrist_right"]))
-    local hand_right_x,hand_right_y = utility.world_to_screen(entity.bone_position(ent,bones["hand_right"]))
+    local body_bones = {
+        {"hip_upper", "hip_lower"},
+        {"hip_upper", "stomach"},
+        {"stomach", "chest"},
+        {"chest", "chest_upper"},
+        {"chest_upper", "head"}
+    }
 
-    local leg_left_x,leg_left_y = utility.world_to_screen(entity.bone_position(ent,bones["leg_left"]))
-    local knee_left_x,knee_left_y = utility.world_to_screen(entity.bone_position(ent,bones["knee_left"]))
-    local foot_left_x,foot_left_y = utility.world_to_screen(entity.bone_position(ent,bones["foot_left"]))
+    local left_arm_bones = {
+        {"chest_upper", "shoulder_left"},
+        {"shoulder_left", "elbow_left"},
+        {"elbow_left", "wrist_left"},
+        {"wrist_left", "hand_left"}
+    }
 
-    local leg_right_x,leg_right_y = utility.world_to_screen(entity.bone_position(ent,bones["leg_right"]))
-    local knee_right_x,knee_right_y = utility.world_to_screen(entity.bone_position(ent,bones["knee_right"]))
-    local foot_right_x,foot_right_y = utility.world_to_screen(entity.bone_position(ent,bones["foot_right"]))
+    local right_arm_bones = {
+        {"chest_upper", "shoulder_right"},
+        {"shoulder_right", "elbow_right"},
+        {"elbow_right", "wrist_right"},
+        {"wrist_right", "hand_right"}
+    }
 
-    render.line(hip_upper_x, hip_upper_y, hip_lower_x, hip_lower_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(hip_upper_x, hip_upper_y, stomach_x, stomach_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(stomach_x, stomach_y, chest_x, chest_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(chest_x, chest_y, chest_upper_x, chest_upper_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(chest_upper_x, chest_upper_y, head_x, head_y, 255, 255, 255, 255, (x*0.2) / distance)
+    local left_leg_bones = {
+        {"hip_lower", "leg_left"},
+        {"leg_left", "knee_left"},
+        {"knee_left", "foot_left"}
+    }
 
-    render.line(chest_upper_x, chest_upper_y, shoulder_left_x, shoulder_left_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(shoulder_left_x, shoulder_left_y, elbow_left_x, elbow_left_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(elbow_left_x, elbow_left_y, wrist_left_x, wrist_left_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(wrist_left_x, wrist_left_y, hand_left_x, hand_left_y, 255, 255, 255, 255, (x*0.2) / distance)
+    local right_leg_bones = {
+        {"hip_lower", "leg_right"},
+        {"leg_right", "knee_right"},
+        {"knee_right", "foot_right"}
+    }
 
-    render.line(chest_upper_x, chest_upper_y, shoulder_right_x, shoulder_right_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(shoulder_right_x, shoulder_right_y, elbow_right_x, elbow_right_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(elbow_right_x, elbow_right_y, wrist_right_x, wrist_right_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(wrist_right_x, wrist_right_y, hand_right_x, hand_right_y, 255, 255, 255, 255, (x*0.2) / distance)
+    drawLines(body_bones, positions)
+    drawLines(left_arm_bones, positions)
+    drawLines(right_arm_bones, positions)
+    drawLines(left_leg_bones, positions)
+    drawLines(right_leg_bones, positions)
 
-    render.line(hip_lower_x, hip_lower_y, leg_left_x, leg_left_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(leg_left_x, leg_left_y, knee_left_x, knee_left_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(knee_left_x, knee_left_y, foot_left_x, foot_left_y, 255, 255, 255, 255, (x*0.2) / distance)
-
-    render.line(hip_lower_x, hip_lower_y, leg_right_x, leg_right_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(leg_right_x, leg_right_y, knee_right_x, knee_right_y, 255, 255, 255, 255, (x*0.2) / distance)
-    render.line(knee_right_x, knee_right_y, foot_right_x, foot_right_y, 255, 255, 255, 255, (x*0.2) / distance)
-
-    --local bx, by, bx2, by2 = entity.get_bounding_box(ent)
-    local ox, oy = utility.world_to_screen(entity.get_origin(ent))
-    render.text(ox-(0.009*x), oy, 255, 0, 0, 255, 0, true, "RADAR")
+    local origin_screen = utility.world_to_screen(entity.get_origin(ent))
+    render.text(origin_screen[1] - (0.009 * screen_center_x), origin_screen[2], 255, 0, 0, 255, 0, true, "RADAR")
 end
 
 local function paint()
-    
     for i, player in ipairs(entity.get_players()) do
-        if(entity.is_enemy(player) and entity.is_alive(player)) then
-            renderBody(player)
+        if entity.is_enemy(player) and entity.is_alive(player) then
+            renderBody(player, screen_center_x)
         end
     end
 end
