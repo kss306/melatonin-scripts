@@ -44,8 +44,7 @@ local function getBoneScreenPositions(ent)
     return positions
 end
 
-local function drawLines(bone_pairs, positions)
-    local thickness = (screen_center_x * 0.2) / distance
+local function drawLines(bone_pairs, positions, thickness)
     for _, pair in ipairs(bone_pairs) do
         local x1, y1 = positions[pair[1]][1], positions[pair[1]][2]
         local x2, y2 = positions[pair[2]][1], positions[pair[2]][2]
@@ -53,7 +52,7 @@ local function drawLines(bone_pairs, positions)
     end
 end
 
-local function renderBody(ent, screen_center_x)
+local function renderBody(ent)
     local enemypawn = entity.get_player_pawn(ent)
     local spottedState = memory.read_byte(enemypawn + custom_offsets["m_entitySpottedState"] + custom_offsets["m_bSpotted"])
 
@@ -66,6 +65,7 @@ local function renderBody(ent, screen_center_x)
     local distance = localOrigin:dist_to(enemyOrigin)
 
     local positions = getBoneScreenPositions(ent)
+    local thickness = (x * 0.2) / distance
 
     local body_bones = {
         {"hip_upper", "hip_lower"},
@@ -101,20 +101,20 @@ local function renderBody(ent, screen_center_x)
         {"knee_right", "foot_right"}
     }
 
-    drawLines(body_bones, positions)
-    drawLines(left_arm_bones, positions)
-    drawLines(right_arm_bones, positions)
-    drawLines(left_leg_bones, positions)
-    drawLines(right_leg_bones, positions)
+    drawLines(body_bones, positions, thickness)
+    drawLines(left_arm_bones, positions, thickness)
+    drawLines(right_arm_bones, positions, thickness)
+    drawLines(left_leg_bones, positions, thickness)
+    drawLines(right_leg_bones, positions, thickness)
 
     local origin_screen = utility.world_to_screen(entity.get_origin(ent))
-    render.text(origin_screen[1] - (0.009 * screen_center_x), origin_screen[2], 255, 0, 0, 255, 0, true, "RADAR")
+    render.text(origin_screen[1] - (0.009 * x), origin_screen[2], 255, 0, 0, 255, 0, true, "RADAR")
 end
 
 local function paint()
     for i, player in ipairs(entity.get_players()) do
         if entity.is_enemy(player) and entity.is_alive(player) then
-            renderBody(player, screen_center_x)
+            renderBody(player)
         end
     end
 end
