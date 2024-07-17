@@ -1,3 +1,8 @@
+--[[
+Check out the docs under: https://melatonin.gitbook.io/lua-documentaiton/documentation/extra-api-doc/custom-callbacks
+If the script stops working after a update, consider updating it from my github due to changed offsets: https://github.com/kss306/melatonin-scripts/blob/main/custom_callbacks.lua
+]]
+
 local custom_callbacks = {}
 custom_callbacks.__index = custom_callbacks
 local active_callbacks = {}
