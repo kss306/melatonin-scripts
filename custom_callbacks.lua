@@ -30,12 +30,16 @@ end
 
 local function round_start(self)
     local round_number = 3
-    send_callback(self, round_number)
+    local time_limit = 1200
+    send_callback(self, round_number, time_limit)
 end
 
 local function round_end(self)
     local round_number = 2
-    send_callback(self, round_number)
+    local winner = "T"
+    local reason = 1
+    local message = "Terrorist win by detonating the bomb"
+    send_callback(self, round_number, winner, reason, message)
 end
 
 local function player_hurt(self)
@@ -112,16 +116,22 @@ local function bomb_defused(self)
     send_callback(self, player, bomb_spot, time_left)
 end
 
-
 local function player_connected(self)
     local player = 8
     send_callback(self, player)
 end
 
+local function player_disconnected(self)
+    local player = 8
+    send_callback(self, player)
+end
 
-function custom_callbacks.set_callback(event, callback)
+
+function custom_callbacks.set_callback(event, callback)   
     if(not event or not callback) then
-        print(string.format("Event or callback non existing"))
+        local calledLine = debug.getinfo(2).currentline
+        local calledSrc = debug.getinfo(2).short_src
+        print(string.format("Event or callback non existing. Error in: %s:%d", calledSrc, calledLine))
         return
     end
     local instance = setmetatable({}, custom_callbacks)
@@ -158,11 +168,11 @@ end
 
 
 custom_callbacks.events = {
-    round_start = round_start, --returns {int: round_number}
-    round_end = round_end, -- returns {int: round_number}
+    round_start = round_start, --returns {int: round_number, int: time_limit}
+    round_end = round_end, -- returns {int: round_number, string: winner, int: reason, string: message}
     player_hurt = player_hurt, -- returns {int: player, int: player_damager, int: dmg_taken, int: hp_left, int: body_part}
     item_purchase = item_purchase, -- returns {int player, string: item, int: cost}
-    bomb_beginplant = bomb_beginplant, -- returns {int: player, string: bomb_spot, int: planted_in}
+    bomb_beginplant = bomb_beginplant, -- returns {int: player, string: bomb_spot, float: planted_in}
     bomb_abortplant = bomb_abortplant, -- reuturns {int: player, string: bomb_spot} 
     bomb_planted = bomb_planted, -- returns {int: player, string: bomb_spot, float: bomb_timer}
     bomb_exploded = bomb_exploded, -- returns {int: player, string: bomb_spot}
@@ -171,7 +181,8 @@ custom_callbacks.events = {
     bomb_begindefuse = bomb_begindefuse, -- returns {int: player, string: bomb_spot, float: defuse_timer, bool: has_kit}
     bomb_abortdefuse = bomb_abortdefuse, -- returns {int: player, string: bomb_spot}
     bomb_defused = bomb_defused, -- returns {int: player, string: bomb_spot, float: time_left}
-    player_connected = player_connected -- returens {int: player}
+    player_connected = player_connected, -- returens {int: player}
+    player_disconnected = player_disconnected -- returns {int: player}
 }
 
 return custom_callbacks

@@ -17,9 +17,9 @@ local function enemy_hit()
     print("enemy hit 2")
 end
 
-local debug = cc.set_callback(events.enemy_hit, test)
+local debug = cc.set_callback(events.player_hurt, test)
 local debug2 = cc.set_callback(events.round_start, round_start)
-local debug3 = cc.set_callback(events.enemy_hit, enemy_hit)
+local debug3 = cc.set_callback(events.player_hurt, enemy_hit)
 --debug:call_event()
 --debug2:call_event()
 cc.call_events()
