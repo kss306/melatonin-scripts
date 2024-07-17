@@ -5,7 +5,7 @@ local active_callbacks = {}
 local function table_contains(tbl, value)
     for i, v in pairs(tbl) do
         if v == value then 
-            return true
+            return true, i
         end
     end
     return false
@@ -16,64 +16,103 @@ local function send_callback(event, ...)
     for i, active_cb in ipairs(active_callbacks) do
         if(active_cb.event == event) then
             local cb = active_cb.callback
+            if(not cb) then
+                active_cb:remove()
+                print("Removed callback due to missing function")
+                goto continue
+            end
             local data = {...}
             cb(data)
+            ::continue::
         end
     end
 end
 
-local function round_start()
-    local event = round_start
+local function round_start(self)
     local round_number = 3
-    send_callback(event, round_number)
+    send_callback(self, round_number)
 end
 
-local function round_end()
-    local event = round_end
+local function round_end(self)
     local round_number = 2
-    send_callback(event, round_number)
+    send_callback(self, round_number)
 end
 
-local function enemy_hit()
-    local event = enemy_hit
+local function enemy_hit(self)
     local dmg_taken = 12
     local hp_remain = 88
-    local player_name = "Peter"
-    send_callback(event, player_name, dmg_taken, hp_remain)
+    local player = 2
+    send_callback(self, player, dmg_taken, hp_remain)
 end
 
-local function bomb_beginplant()
-    print("bomb begin plant")
+local function bomb_beginplant(self)
+    local player = 4
+    local bomb_spot = "A"
+    local planted_in = 4
+    send_callback(self, player, bomb_spot, planted_in)
 end
 
-local function bomb_abortplant()
-    print("bomb plant aborted")
+local function bomb_abortplant(self)
+    local player = 4
+    local bomb_spot = "A"
+    send_callback(self, player, bomb_spot)
 end
 
-local function bomb_planted()
-    print("Bomb planted")
+local function bomb_planted(self)
+    local player = 4
+    local bomb_site = "A"
+    local bomb_timer = 45
+    send_callback(self, player, bomb_site, bomb_timer)
 end
 
-local function bomb_dropped()
-    print("bomb dropped")
+local function bomb_exploded(self)
+    local player = 4
+    local bomb_site = "A"
+    send_callback(self, player, bomb_site)
 end
 
-local function bomb_begindefuse()
-    print("defuse begins")
+local function bomb_dropped(self)
+    local player = 4
+    local bomb = 11
+    send_callback(self, player, bomb)
 end
 
-local function bomb_abortdefuse()
-    print("defuse stopped")
+local function bomb_pickup(self)
+    local player = 5
+    send_callback(self, player)
 end
 
-local function player_connected()
-    print("player connected")
+local function bomb_begindefuse(self)
+    local player = 7
+    local bomb_spot = "A"
+    local defuse_timer = 5
+    local has_kit = true
+    send_callback(self, player, bomb_spot, defuse_timer, has_kit)
+end
+
+local function bomb_abortdefuse(self)
+    local player = 7
+    local bomb_spot = "A"
+    send_callback(self, player, bomb_spot)
+end
+
+local function bomb_defused(self)
+    local player = 7
+    local bomb_spot = "A"
+    local time_left = 0.5
+    send_callback(self, player, bomb_spot, time_left)
+end
+
+
+local function player_connected(self)
+    local player = 8
+    send_callback(self, player)
 end
 
 
 function custom_callbacks.set_callback(event, callback)
     if(not event or not callback) then
-        print(string.format("Event or Callback non existing"))
+        print(string.format("Event or callback non existing"))
         return
     end
     local instance = setmetatable({}, custom_callbacks)
@@ -81,6 +120,11 @@ function custom_callbacks.set_callback(event, callback)
     instance.callback = callback
     table.insert(active_callbacks, instance)
     return instance
+end
+
+function custom_callbacks:remove()
+    local bool, index = table_contains(active_callbacks, self)
+    if(bool) then table.remove(active_callbacks, index) end
 end
 
 function custom_callbacks.callback_count()
@@ -94,28 +138,30 @@ end
 function custom_callbacks.call_events()
     local alrdy_ran = {}
     for i, event in ipairs(active_callbacks) do
-        if(table_contains(alrdy_ran, event.event)) then goto continue end
-        event.event()
-        table.insert(alrdy_ran, event.event)
+        event = event.event
+        if(table_contains(alrdy_ran, event)) then goto continue end
+        event(event)
+        table.insert(alrdy_ran, event)
         ::continue::
     end
-    print(string.format("Registerd Events: %s", #active_callbacks))
+    --print(string.format("Registerd Events: %s", #active_callbacks))
 end
 
 
-
-
 custom_callbacks.events = {
-    round_start = round_start, --returns new round int
-    round_end = round_end, -- returns passed round int
-    enemy_hit = enemy_hit, -- returns player name, damage taken and hp left
-    bomb_beginplant = bomb_beginplant, -- returens seconds as int till planted
-    bomb_abortplant = bomb_abortplant,
-    bomb_planted = bomb_planted, -- returns bomb spot and planter pawn
-    bomb_dropped = bomb_dropped,
-    bomb_begindefuse = bomb_begindefuse, -- returns defuser pawn and time till defused as int
-    bomb_abortdefuse = bomb_abortdefuse,
-    player_connected = player_connected -- returens player pawn
+    round_start = round_start, --returns {int: round_number}
+    round_end = round_end, -- returns {int: round_number}
+    enemy_hit = enemy_hit, -- returns {int: player, int: dmg_taken, int: hp_left}
+    bomb_beginplant = bomb_beginplant, -- returns {int: player, string: bomb_spot, int: planted_in}
+    bomb_abortplant = bomb_abortplant, -- reuturns {int: player, string: bomb_spot} 
+    bomb_planted = bomb_planted, -- returns {int: player, string: bomb_spot, float: bomb_timer}
+    bomb_exploded = bomb_exploded, -- returns {int: player, string: bomb_spot}
+    bomb_dropped = bomb_dropped, -- returns {int: player, int: bomb}
+    bomb_pickup = bomb_pickup, -- reuturns {int: player}
+    bomb_begindefuse = bomb_begindefuse, -- returns {int: player, string: bomb_spot, float: defuse_timer, bool: has_kit}
+    bomb_abortdefuse = bomb_abortdefuse, -- returns {int: player, string: bomb_spot}
+    bomb_defused = bomb_defused, -- returns {int: player, string: bomb_spot, float: time_left}
+    player_connected = player_connected -- returens {int: player}
 }
 
 return custom_callbacks
