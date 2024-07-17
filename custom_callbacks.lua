@@ -38,11 +38,20 @@ local function round_end(self)
     send_callback(self, round_number)
 end
 
-local function enemy_hit(self)
+local function player_hurt(self)
+    local player_hit = 2
+    local player_damager = 3
     local dmg_taken = 12
     local hp_remain = 88
+    local body_part = 3
+    send_callback(self, player_hit, player_damager, dmg_taken, hp_remain, body_part)
+end
+
+local function item_purchase(self)
     local player = 2
-    send_callback(self, player, dmg_taken, hp_remain)
+    local item = 2
+    local cost = 2500
+    send_callback(self, player, item, cost)
 end
 
 local function bomb_beginplant(self)
@@ -151,7 +160,8 @@ end
 custom_callbacks.events = {
     round_start = round_start, --returns {int: round_number}
     round_end = round_end, -- returns {int: round_number}
-    enemy_hit = enemy_hit, -- returns {int: player, int: dmg_taken, int: hp_left}
+    player_hurt = player_hurt, -- returns {int: player, int: player_damager, int: dmg_taken, int: hp_left, int: body_part}
+    item_purchase = item_purchase, -- returns {int player, string: item, int: cost}
     bomb_beginplant = bomb_beginplant, -- returns {int: player, string: bomb_spot, int: planted_in}
     bomb_abortplant = bomb_abortplant, -- reuturns {int: player, string: bomb_spot} 
     bomb_planted = bomb_planted, -- returns {int: player, string: bomb_spot, float: bomb_timer}
