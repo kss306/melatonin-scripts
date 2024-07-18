@@ -4,8 +4,8 @@ local events = cc.events
 
 local function test(data)
     local player_name = data[1]
-    local dmg_taken = data[2]
-    local hp_left = data[3]
+    local dmg_taken = data[3]
+    local hp_left = data[4]
     print(string.format("Hit %s for: %d HP Left: %d",player_name, dmg_taken, hp_left))
 end
 

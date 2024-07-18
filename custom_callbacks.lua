@@ -50,8 +50,8 @@ end
 local function player_hurt(self)
     local player_hit = 2
     local player_damager = 3
-    local dmg_taken = 12
-    local hp_remain = 88
+    local dmg_taken = 45
+    local hp_remain = 55
     local body_part = 3
     send_callback(self, player_hit, player_damager, dmg_taken, hp_remain, body_part)
 end
